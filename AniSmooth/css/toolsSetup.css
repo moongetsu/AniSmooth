@@ -92,7 +92,7 @@
 
 .ts-install-log {
   background: #161616; border: 1px solid #3c3c3c; border-radius: 4px;
-  padding: 4px 6px; max-height: 100px; overflow-y: auto; margin-bottom: 8px;
+  padding: 4px 6px; max-height: 180px; overflow-y: auto; margin-bottom: 8px;
   font-family: 'Consolas','Courier New',monospace; font-size: 8px; line-height: 1.4; text-align: left;
 }
 .ts-log-line { color: #aaaaaa; white-space: pre-wrap; word-break: break-all; padding: 0; }
@@ -137,7 +137,7 @@
 .ts-gpu-download-msg { font-size: 9px; color: #e5e7eb; margin-bottom: 4px; }
 .ts-gpu-download-log {
   background: #161616; border: 1px solid #3c3c3c; border-radius: 4px;
-  padding: 4px 6px; max-height: 80px; overflow-y: auto;
+  padding: 4px 6px; max-height: 140px; overflow-y: auto;
   font-family: 'Consolas','Courier New',monospace; font-size: 8px; line-height: 1.4; text-align: left;
 }
 .ts-gpu-download-log div { color: #aaaaaa; white-space: pre-wrap; word-break: break-all; }

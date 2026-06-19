@@ -322,10 +322,18 @@
     }
     actions += '</div></div>';
 
+    var gpuDiagHtml = '';
+    if (_gpuChoice === 'gpu' && _gpuChecked && (!_gpuInfo || !_gpuInfo.nvidia_gpu_detected) && _gpuDiag.length > 0) {
+      gpuDiagHtml = '<div class="ts-gpu-download-log" style="margin-top:8px;">' +
+        _gpuDiag.map(function(l) { return '<div style="color:#fca5a5;">' + escapeHtml(l) + '</div>'; }).join('') +
+        '</div>';
+    }
+
     var html = '<div class="setup-card">' +
       '<h2>System Check</h2>' +
       '<p class="setup-desc">Scanning your system for required tools and hardware.</p>' +
       '<div class="ts-tool-list">' + rows + '</div>' +
+      gpuDiagHtml +
       actions +
     '</div></div>';
 
@@ -411,30 +419,48 @@
     tryCmd(0);
   }
 
+  var _gpuDiag = [];
+
   function checkGpuAsync() {
     var extPath = "";
     try { var cs = new CSInterface(); extPath = cs.getSystemPath(SystemPath.EXTENSION); } catch (e) {}
     var scriptPath = (window.FileSystem.path && extPath) ? window.FileSystem.path.join(extPath, 'python', 'main.py') : 'main.py';
+    _gpuDiag = [];
     try {
       var proc = window.FileSystem.childProcess.spawn(_pythonCmd || 'python', [scriptPath, '--mode', 'gpu-info']);
       var stdout = '';
+      var stderr = '';
       proc.stdout.on('data', function (d) { stdout += d.toString(); });
-      proc.on('close', function () {
+      proc.stderr.on('data', function (d) { stderr += d.toString(); });
+      proc.on('close', function (code) {
         var lines = stdout.split('\n');
         for (var i = 0; i < lines.length; i++) {
           try {
             var j = JSON.parse(lines[i]);
             if (j.type === 'gpu_info') {
               _gpuInfo = JSON.parse(j.msg);
-              break;
+            } else if (j.type === 'warn' || j.type === 'error') {
+              _gpuDiag.push((j.type === 'error' ? '[ERR] ' : '[WARN] ') + j.msg);
+            } else if (j.type === 'info') {
+              _gpuDiag.push(j.msg);
             }
           } catch (_) {}
+        }
+        if (!_gpuInfo && stderr) {
+          var stderrLines = stderr.split('\n');
+          for (var k = 0; k < stderrLines.length; k++) {
+            var s = stderrLines[k].trim();
+            if (s) _gpuDiag.push('[STDERR] ' + s);
+          }
+        }
+        if (!_gpuInfo && code !== 0) {
+          _gpuDiag.push('[ERR] Python exited with code ' + code);
         }
         _gpuChecked = true;
         renderSetupStep();
       });
-      proc.on('error', function () { _gpuChecked = true; renderSetupStep(); });
-    } catch (e) { _gpuChecked = true; renderSetupStep(); }
+      proc.on('error', function () { _gpuDiag.push('[ERR] Failed to spawn Python process'); _gpuChecked = true; renderSetupStep(); });
+    } catch (e) { _gpuDiag.push('[ERR] ' + e.message); _gpuChecked = true; renderSetupStep(); }
   }
 
   var _pytorchExtra = '';
@@ -730,10 +756,10 @@
     hideToolsSetup();
   }
 
-  function scanToolsAndRefresh() { _pythonChecked = false; _gpuChecked = false; _pytorchChecked = false; _gpuDownloadState = null; renderSetupStep(); }
+  function scanToolsAndRefresh() { _pythonChecked = false; _gpuChecked = false; _pytorchChecked = false; _gpuDiag = []; _gpuDownloadState = null; renderSetupStep(); }
 
   function goToSetupStep(step) {
-    if (step === 'check') { _pythonChecked = false; _gpuChecked = false; _pytorchChecked = false; }
+    if (step === 'check') { _pythonChecked = false; _gpuChecked = false; _pytorchChecked = false; _gpuDiag = []; }
     if (step === 'welcome') { _gpuChoice = null; _gpuDownloadState = null; }
     _step = step;
     renderSetupStep();
