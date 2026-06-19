@@ -156,52 +156,94 @@ def install_ffmpeg():
         return False
 
 def _find_nvidia_smi():
-    """Find nvidia-smi executable in common locations."""
+    """Find nvidia-smi executable. Prefers NVIDIA's install dir over System32 stub."""
     import shutil
     
-    # First try PATH
-    smi = shutil.which("nvidia-smi")
-    if smi:
-        return smi
-    
-    # Common Windows locations
-    common_paths = [
+    # Prefer NVIDIA's own directory (real smi with full output)
+    nvidia_dirs = [
         r"C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
         r"C:\Program Files (x86)\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
-        r"C:\Windows\System32\nvidia-smi.exe",
     ]
-    
-    for path in common_paths:
+    for path in nvidia_dirs:
         if os.path.exists(path):
             return path
     
+    # Fallback: PATH or System32
+    smi = shutil.which("nvidia-smi")
+    if smi and "NVIDIA Corporation" not in smi:
+        # It might be the System32 stub — check NVIDIA dirs via PATH parent
+        pass
+    if smi:
+        return smi
+    
+    if os.path.exists(r"C:\Windows\System32\nvidia-smi.exe"):
+        return r"C:\Windows\System32\nvidia-smi.exe"
+    
     return None
 
-def _detect_cuda_pytorch_index():
-    """Detect CUDA version and return appropriate PyTorch index URL."""
-    smi_path = _find_nvidia_smi()
-    if not smi_path:
-        log("warn", "nvidia-smi not found in PATH or common locations")
-        return None
-    
+def _get_cuda_version_from_smi(smi_path):
+    """Run nvidia-smi and extract CUDA version. Returns version string or None."""
     try:
         result = subprocess.run(
             [smi_path], capture_output=True, text=True, timeout=10
         )
         if result.returncode != 0:
-            log("warn", f"nvidia-smi failed with code {result.returncode}")
             return None
+        
         for line in result.stdout.split("\n"):
             if "CUDA Version:" in line:
-                ver = line.strip().split("CUDA Version:")[-1].strip().split(" ")[0]
-                major = int(ver.split(".")[0])
-                if major >= 12:
-                    return "https://download.pytorch.org/whl/cu124"
-                elif major >= 11:
-                    return "https://download.pytorch.org/whl/cu118"
-                break
-    except Exception as e:
-        log("warn", f"Failed to detect CUDA version: {e}")
+                raw = line.strip().split("CUDA Version:")[-1].strip()
+                return raw.split(" ")[0]
+        
+        # Alternative: query driver_version which implies CUDA compat
+        result2 = subprocess.run(
+            [smi_path, "--query-gpu=driver_version", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=10
+        )
+        if result2.returncode == 0:
+            driver = result2.stdout.strip().split(".")[0]
+            driver_int = int(driver) if driver.isdigit() else 0
+            if driver_int >= 570: return "12.6"
+            if driver_int >= 550: return "12.4"
+            if driver_int >= 525: return "12.0"
+            if driver_int >= 470: return "11.4"
+    except Exception:
+        pass
+    return None
+
+def _detect_cuda_pytorch_index():
+    """Detect CUDA version and return appropriate PyTorch index URL."""
+    import shutil
+    
+    # Try multiple paths: NVIDIA dir first, then PATH/System32
+    nvidia_paths = [
+        r"C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
+        r"C:\Program Files (x86)\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
+    ]
+    for p in nvidia_paths:
+        if not os.path.exists(p):
+            continue
+        ver = _get_cuda_version_from_smi(p)
+        if ver:
+            log("info", f"nvidia-smi: {p} → CUDA {ver}")
+            major = int(ver.split(".")[0])
+            return "https://download.pytorch.org/whl/cu124" if major >= 12 else "https://download.pytorch.org/whl/cu118"
+    
+    smi = shutil.which("nvidia-smi")
+    if smi:
+        ver = _get_cuda_version_from_smi(smi)
+        if ver:
+            log("info", f"nvidia-smi: {smi} → CUDA {ver}")
+            major = int(ver.split(".")[0])
+            return "https://download.pytorch.org/whl/cu124" if major >= 12 else "https://download.pytorch.org/whl/cu118"
+    
+    if os.path.exists(r"C:\Windows\System32\nvidia-smi.exe"):
+        ver = _get_cuda_version_from_smi(r"C:\Windows\System32\nvidia-smi.exe")
+        if ver:
+            log("info", f"nvidia-smi: System32 → CUDA {ver}")
+            major = int(ver.split(".")[0])
+            return "https://download.pytorch.org/whl/cu124" if major >= 12 else "https://download.pytorch.org/whl/cu118"
+    
     return None
 
 def install_pip_packages():

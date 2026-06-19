@@ -15,22 +15,24 @@ def get_device():
     return torch.device("cpu")
 
 def _find_nvidia_smi():
-    """Find nvidia-smi executable in common locations."""
-    # First try PATH
+    """Find nvidia-smi executable. Prefers NVIDIA's install dir over System32 stub."""
+    # Prefer NVIDIA's own directory (real smi with full output)
+    nvidia_dirs = [
+        r"C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
+        r"C:\Program Files (x86)\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
+    ]
+    for path in nvidia_dirs:
+        if os.path.exists(path):
+            return path
+    
+    # Fallback: PATH
     smi = shutil.which("nvidia-smi")
     if smi:
         return smi
     
-    # Common Windows locations
-    common_paths = [
-        r"C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
-        r"C:\Program Files (x86)\NVIDIA Corporation\NVSMI\nvidia-smi.exe",
-        r"C:\Windows\System32\nvidia-smi.exe",
-    ]
-    
-    for path in common_paths:
-        if os.path.exists(path):
-            return path
+    # Last resort: System32
+    if os.path.exists(r"C:\Windows\System32\nvidia-smi.exe"):
+        return r"C:\Windows\System32\nvidia-smi.exe"
     
     return None
 
