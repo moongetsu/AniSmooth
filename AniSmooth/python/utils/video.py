@@ -105,6 +105,38 @@ def fix_faststart(video_path):
             except: pass
     return False
 
+def reencode_high_quality(video_path):
+    """Re-encode video with x264 CRF 18 for high quality output."""
+    ffmpeg = _find_ffmpeg()
+    if not ffmpeg:
+        log("warn", "FFmpeg not found, cannot re-encode")
+        return False
+    
+    tmp = str(video_path) + ".hq.mp4"
+    cmd = [
+        ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+        "-i", str(video_path),
+        "-c:v", "libx264", "-crf", "18", "-preset", "medium",
+        "-c:a", "copy",
+        "-movflags", "+faststart",
+        tmp
+    ]
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        if result.returncode == 0 and os.path.exists(tmp) and os.path.getsize(tmp) > 1024:
+            os.replace(tmp, str(video_path))
+            log("info", "Re-encoded with x264 CRF 18 for high quality")
+            return True
+        log("warn", "High quality re-encode failed or produced invalid output")
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+    except Exception as e:
+        log("warn", f"High quality re-encode error: {e}")
+        if os.path.exists(tmp):
+            try: os.unlink(tmp)
+            except: pass
+    return False
+
 def reencode_to_size(video_path, audio_source_path, target_mb):
     """Re-encode video to target file size using FFmpeg two-pass encoding.
     Returns True on success. Overwrites video_path in-place."""
@@ -113,10 +145,10 @@ def reencode_to_size(video_path, audio_source_path, target_mb):
         log("error", "FFmpeg not found, cannot re-encode")
         return False
 
-    # Get video duration
+    # Get video duration from the processed video (not the source)
     duration = None
     try:
-        probe_cmd = [ffmpeg, "-i", str(audio_source_path), "-f", "null", "-"]
+        probe_cmd = [ffmpeg, "-i", str(video_path), "-f", "null", "-"]
         r = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=30)
         for line in r.stderr.split("\n"):
             if "Duration:" in line:
@@ -131,7 +163,7 @@ def reencode_to_size(video_path, audio_source_path, target_mb):
         log("error", "Could not determine video duration for bitrate calculation")
         return False
 
-    # Audio bitrate: detect from source, default 192k
+    # Audio bitrate: detect from the processed video, default 192k
     audio_bitrate_kbps = 192
     try:
         r = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=30)
@@ -162,7 +194,7 @@ def reencode_to_size(video_path, audio_source_path, target_mb):
     tmp = str(video_path) + ".tmp.mp4"
     null_path = "NUL" if os.name == "nt" else "/dev/null"
 
-    # Pass 1: analysis
+    # Pass 1: analysis (skip audio)
     cmd1 = [
         ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
         "-i", str(video_path),
@@ -170,7 +202,7 @@ def reencode_to_size(video_path, audio_source_path, target_mb):
         "-maxrate", f"{video_bitrate_kbps * 2}k",
         "-bufsize", f"{video_bitrate_kbps * 4}k",
         "-preset", "medium",
-        "-pass", "1", "-f", "null", null_path
+        "-an", "-pass", "1", "-f", "null", null_path
     ]
     try:
         r1 = subprocess.run(cmd1, capture_output=True, text=True, timeout=600)

@@ -233,9 +233,21 @@ function renderSelectedLayer(outputPathDir, layerName) {
     var rq = app.project.renderQueue;
     var item = rq.items.add(comp);
     
-     
-    item.timeSpanStart = layer.inPoint;
-    item.timeSpanDuration = layer.outPoint - layer.inPoint;
+    // Use work area if set, otherwise use layer in/out points
+    var renderStart = layer.inPoint;
+    var renderEnd = layer.outPoint;
+    
+    // Check if work area is active and smaller than layer range
+    if (comp.workAreaStart !== undefined && comp.workAreaDuration !== undefined) {
+      var waStart = comp.workAreaStart;
+      var waEnd = comp.workAreaStart + comp.workAreaDuration;
+      // Use the intersection of work area and layer range
+      renderStart = Math.max(layer.inPoint, waStart);
+      renderEnd = Math.min(layer.outPoint, waEnd);
+    }
+    
+    item.timeSpanStart = renderStart;
+    item.timeSpanDuration = renderEnd - renderStart;
     
     
     var outputModule = item.outputModule(1);
