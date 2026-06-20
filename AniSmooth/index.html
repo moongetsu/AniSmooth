@@ -57,27 +57,27 @@
             <span class="form-hint">How many grid blocks (out of 16) must change to consider it unique motion.</span>
           </div>
           <div class="form-group">
-            <div class="toggle-row" style="padding:0;margin-bottom:4px;">
+            <label class="toggle-row" style="padding:0;margin-bottom:4px;">
               <span class="toggle-label" style="flex:1;">Track Motion (Optical Flow)</span>
               <input type="checkbox" class="toggle-input" id="deadframeOpticalFlow" checked>
               <span class="toggle-switch"></span>
-            </div>
+            </label>
             <span class="form-hint">Uses pixel tracking to tell the difference between duplicates and slow motion.</span>
           </div>
           <div class="form-group">
-            <div class="toggle-row" style="padding:0;margin-bottom:4px;">
+            <label class="toggle-row" style="padding:0;margin-bottom:4px;">
               <span class="toggle-label" style="flex:1;">Ignore Camera Movement</span>
               <input type="checkbox" class="toggle-input" id="deadframeCameraComp" checked>
               <span class="toggle-switch"></span>
-            </div>
+            </label>
             <span class="form-hint">Detects camera panning/zooming so camera movement isn't mistaken for unique frames.</span>
           </div>
           <div class="form-group" style="margin-bottom: 12px;">
-            <div class="toggle-row" style="padding:0;margin-bottom:4px;">
+            <label class="toggle-row" style="padding:0;margin-bottom:4px;">
               <span class="toggle-label" style="flex:1;">Remove Frozen Characters</span>
               <input type="checkbox" class="toggle-input" id="deadframeStaticSubject" checked>
               <span class="toggle-switch"></span>
-            </div>
+            </label>
             <span class="form-hint">Removes frames where the background/camera moves but the characters themselves are completely frozen.</span>
           </div>
           <button id="removeDeadframesBtn" class="btn">
@@ -468,14 +468,14 @@
             <input type="text" id="outputPrefix" value="AniSmooth" maxlength="24">
             <span class="form-hint">Prepended to all output filenames.</span>
           </div>
-          <div class="form-group">
-            <label for="outputTimestamp">Include Timestamp</label>
-            <div class="toggle-row" style="padding:0;">
-              <input type="checkbox" class="toggle-input" id="outputTimestamp" checked>
-              <span class="toggle-switch"></span>
-              <span style="font-size:9px;color:#aaaaaa;margin-left:4px;">Prevents overwrites</span>
+            <div class="form-group">
+              <label for="outputTimestamp">Include Timestamp</label>
+              <label class="toggle-row" style="padding:0;">
+                <input type="checkbox" class="toggle-input" id="outputTimestamp" checked>
+                <span class="toggle-switch"></span>
+                <span style="font-size:9px;color:#aaaaaa;margin-left:4px;">Prevents overwrites</span>
+              </label>
             </div>
-          </div>
         </div>
 
         <div class="panel">
@@ -484,19 +484,19 @@
             <span class="panel-title">Behavior</span>
           </div>
           <div class="form-group">
-            <div class="toggle-row" style="padding:0;margin-bottom:6px;">
+            <label class="toggle-row" style="padding:0;margin-bottom:6px;">
               <span class="toggle-label" style="flex:1;">Auto-import to AE</span>
               <input type="checkbox" class="toggle-input" id="outputAutoImport" checked>
               <span class="toggle-switch"></span>
-            </div>
+            </label>
             <span class="form-hint">Automatically adds processed files to the active composition.</span>
           </div>
           <div class="form-group">
-            <div class="toggle-row" style="padding:0;margin-bottom:6px;">
+            <label class="toggle-row" style="padding:0;margin-bottom:6px;">
               <span class="toggle-label" style="flex:1;">Save pre-render copy</span>
               <input type="checkbox" class="toggle-input" id="outputKeepPrerender" checked>
               <span class="toggle-switch"></span>
-            </div>
+            </label>
             <span class="form-hint">Keeps an extra copy of the timeline pre-render alongside the processed output.</span>
           </div>
         </div>
