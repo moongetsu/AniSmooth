@@ -242,6 +242,9 @@
         "--model", modelKey,
         "--factor", options.fpsFactor || "2"
       ];
+      if (options.targetSizeMb && parseFloat(options.targetSizeMb) > 0) {
+        args.push("--target-size-mb", String(parseFloat(options.targetSizeMb)));
+      }
 
       this.executeModel(pythonCmd, args, callbacks);
     },
@@ -266,6 +269,9 @@
         "--model", modelKey,
         "--factor", options.scale || "2"
       ];
+      if (options.targetSizeMb && parseFloat(options.targetSizeMb) > 0) {
+        args.push("--target-size-mb", String(parseFloat(options.targetSizeMb)));
+      }
 
       this.executeModel(pythonCmd, args, callbacks);
     },

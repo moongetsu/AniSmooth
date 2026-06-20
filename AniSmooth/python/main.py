@@ -143,7 +143,7 @@ def load_upscale_model(model_name, scale, device):
 
     raise RuntimeError(f"Weights not available for {model_name}")
 
-def run_interpolation(input_path, output_path, model_name, factor):
+def run_interpolation(input_path, output_path, model_name, factor, target_size_mb=None):
     log("info", f"Starting RIFE Interpolation. Model: {model_name}, Factor: {factor}x")
 
     print_gpu_info()
@@ -275,6 +275,10 @@ def run_interpolation(input_path, output_path, model_name, factor):
     if device.type == "cuda":
         torch.cuda.empty_cache()
     mux_audio(output_path, input_path)
+    if target_size_mb and target_size_mb > 0:
+        from utils.video import reencode_to_size
+        log("info", f"Re-encoding to target size: {target_size_mb} MB")
+        reencode_to_size(output_path, input_path, target_size_mb)
     log("success", "Interpolation process completed successfully.")
 
 def run_upscaling(input_path, output_path, model_name, scale):
@@ -326,6 +330,10 @@ def run_upscaling(input_path, output_path, model_name, scale):
     if device.type == "cuda":
         torch.cuda.empty_cache()
     mux_audio(output_path, input_path)
+    if target_size_mb and target_size_mb > 0:
+        from utils.video import reencode_to_size
+        log("info", f"Re-encoding to target size: {target_size_mb} MB")
+        reencode_to_size(output_path, input_path, target_size_mb)
     log("success", "Upscaling process completed successfully.")
 
 def run_gpu_info():
@@ -573,6 +581,8 @@ def main():
                         help="Disable camera motion compensation")
     parser.add_argument("--no-static-subject", action="store_true",
                         help="Disable static subject detection")
+    parser.add_argument("--target-size-mb", type=float, default=0,
+                        help="Target output file size in MB (re-encodes with FFmpeg)")
 
     args = parser.parse_args()
 
@@ -614,9 +624,9 @@ def main():
 
     try:
         if args.mode == "interpolate":
-            run_interpolation(args.input, args.output, args.model, args.factor)
+            run_interpolation(args.input, args.output, args.model, args.factor, args.target_size_mb)
         elif args.mode == "upscale":
-            run_upscaling(args.input, args.output, args.model, args.factor)
+            run_upscaling(args.input, args.output, args.model, args.factor, args.target_size_mb)
     except Exception as e:
         log("error", f"Processing failed: {e}")
         import traceback

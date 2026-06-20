@@ -125,6 +125,11 @@
             </div>
             <div class="info-card" id="interpFactorInfo"></div>
           </div>
+          <div class="form-group">
+            <label for="interpTargetSize">Target File Size (MB) — optional</label>
+            <input type="number" id="interpTargetSize" value="0" min="0" step="1" placeholder="0 = no limit">
+            <span class="form-hint">Re-encodes output to stay under this size. 0 = keep raw quality.</span>
+          </div>
           <div class="btn-row">
             <button id="startInterpolateBtn" class="btn">
               <i class="fa-solid fa-plus"></i> Add to Queue
@@ -195,6 +200,11 @@
               </div>
             </div>
             <div class="info-card" id="upscaleScaleInfo"></div>
+          </div>
+          <div class="form-group">
+            <label for="upscaleTargetSize">Target File Size (MB) — optional</label>
+            <input type="number" id="upscaleTargetSize" value="0" min="0" step="1" placeholder="0 = no limit">
+            <span class="form-hint">Re-encodes output to stay under this size. 0 = keep raw quality.</span>
           </div>
           <div class="btn-row">
             <button id="startUpscaleBtn" class="btn">

@@ -209,11 +209,11 @@
       };
 
       if (item.mode === "upscale") {
-        window.ModelHandler.upscaleClip(inputPath, outputPath, item.model, { scale: String(item.scale) }, callbacks);
+        window.ModelHandler.upscaleClip(inputPath, outputPath, item.model, { scale: String(item.scale), targetSizeMb: item.targetSizeMb || 0 }, callbacks);
       } else if (item.mode === "dedupe") {
         window.ModelHandler.dedupeClip(inputPath, outputPath, item.threshold || 0.05, item.options || {}, callbacks);
       } else {
-        window.ModelHandler.interpolateClip(inputPath, outputPath, item.model, { fpsFactor: String(item.factor) }, callbacks);
+        window.ModelHandler.interpolateClip(inputPath, outputPath, item.model, { fpsFactor: String(item.factor), targetSizeMb: item.targetSizeMb || 0 }, callbacks);
       }
     }
   };
