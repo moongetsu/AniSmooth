@@ -305,21 +305,18 @@ class VideoProcessor:
     def __init__(self, input_path, output_path):
         self.input_path = input_path
         self.output_path = output_path
+        self.use_ffmpeg = _find_ffmpeg() is not None
         self.cap = cv2.VideoCapture(input_path)
         if not self.cap.isOpened():
-            # Raise instead of sys.exit so main()'s try/except owns error
-            # reporting and the class stays reusable/testable (matches
-            # processor.py's convention).
             raise RuntimeError(f"Failed to open input video: {input_path}")
             
         self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.fps = self.cap.get(cv2.CAP_PROP_FPS)
         
-        
         total = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         self.total_frames = total if total > 0 else 1
-        self.writer = None
+        self._ffmpeg_proc = None
 
     def get_info(self):
         return self.width, self.height, self.fps, self.total_frames
@@ -328,17 +325,38 @@ class VideoProcessor:
         out_w = self.width * scale
         out_h = self.height * scale
         
-        
-        ext = self.output_path.split('.')[-1].lower()
-        if ext == 'avi':
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        elif ext in ['mov', 'm4v']:
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        if self.use_ffmpeg:
+            ffmpeg = _find_ffmpeg()
+            cmd = [
+                ffmpeg, "-y", "-hide_banner", "-loglevel", "error",
+                "-f", "rawvideo", "-vcodec", "rawvideo",
+                "-s", f"{out_w}x{out_h}", "-pix_fmt", "bgr24",
+                "-r", str(output_fps), "-i", "-",
+                "-c:v", "libx264", "-crf", "18", "-preset", "medium",
+                "-pix_fmt", "yuv420p",
+                "-movflags", "+faststart",
+                str(self.output_path)
+            ]
+            self._ffmpeg_proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
         else:
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            ext = self.output_path.split('.')[-1].lower()
+            if ext == 'avi':
+                fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            elif ext in ['mov', 'm4v']:
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            else:
+                fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            self.writer = cv2.VideoWriter(self.output_path, fourcc, output_fps, (out_w, out_h))
+        return self
 
-        self.writer = cv2.VideoWriter(self.output_path, fourcc, output_fps, (out_w, out_h))
-        return self.writer
+    def write_frame(self, frame):
+        if self._ffmpeg_proc:
+            try:
+                self._ffmpeg_proc.stdin.write(frame.tobytes())
+            except BrokenPipeError:
+                pass
+        elif self.writer:
+            self.writer.write(frame)
 
     def read_frames(self):
         while True:
@@ -349,5 +367,11 @@ class VideoProcessor:
 
     def close(self):
         self.cap.release()
+        if self._ffmpeg_proc:
+            try:
+                self._ffmpeg_proc.stdin.close()
+            except Exception:
+                pass
+            self._ffmpeg_proc.wait()
         if self.writer:
             self.writer.release()

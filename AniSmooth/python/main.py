@@ -144,11 +144,10 @@ def load_upscale_model(model_name, scale, device):
     raise RuntimeError(f"Weights not available for {model_name}")
 
 def finalize_output(output_path, input_path, target_size_mb=None):
-    """Mux source audio, optionally re-encode to a target size, then fix faststart.
+    """Mux source audio, optionally re-encode to a target size.
 
-    Shared finalization for the interpolation and upscaling outputs so the two
-    paths cannot drift apart (the prior copy-pasted blocks are what let the
-    upscale signature/finalize mismatch slip in).
+    The FFmpeg pipe already encodes with x264 CRF 18 + faststart,
+    so no separate re-encode is needed unless target_size_mb is set.
     """
     mux_audio(output_path, input_path)
     if target_size_mb and target_size_mb > 0:
@@ -156,9 +155,6 @@ def finalize_output(output_path, input_path, target_size_mb=None):
         if not reencode_to_size(output_path, input_path, target_size_mb):
             log("warn", "Two-pass encoding failed, falling back to high-quality re-encode")
             reencode_high_quality(output_path)
-    else:
-        reencode_high_quality(output_path)
-    fix_faststart(output_path)
 
 def run_interpolation(input_path, output_path, model_name, factor, target_size_mb=None):
     log("info", f"Starting RIFE Interpolation. Model: {model_name}, Factor: {factor}x")
@@ -233,7 +229,7 @@ def run_interpolation(input_path, output_path, model_name, factor, target_size_m
                 
                 
                 for _ in range(1, factor):
-                    video.writer.write(prev_frame)
+                    video.write_frame(prev_frame)
             elif use_tensorrt and trt_engine is not None:
                 
                 t0 = frame_to_tensor(prev_frame, device).half()
@@ -253,27 +249,24 @@ def run_interpolation(input_path, output_path, model_name, factor, target_size_m
                         })
                         mid = unpad(result["output"].float(), pad_info)
                     interp = tensor_to_frame(mid, str(device))
-                    video.writer.write(interp)
+                    video.write_frame(interp)
             else:
                 
-                t0 = frame_to_tensor(prev_frame, device)
-                t1 = frame_to_tensor(frame, device)
+                t0 = frame_to_tensor(prev_frame, device).to(memory_format=torch.channels_last)
+                t1 = frame_to_tensor(frame, device).to(memory_format=torch.channels_last)
                 t0_padded, pad_info = pad_to_mod(t0, 32)
                 t1_padded, _ = pad_to_mod(t1, 32)
-                with torch.no_grad():
+                with torch.no_grad(), torch.cuda.amp.autocast(enabled=device.type == "cuda"):
                     for f in range(1, factor):
                         alpha = f / factor
-                        
-                        
-                        
                         mid = model(t0_padded, t1_padded, alpha)
                         mid = unpad(mid, pad_info)
-                        interp_frame = tensor_to_frame(mid, str(device))
-                        video.writer.write(interp_frame)
+                        interp_frame = tensor_to_frame(mid.float(), str(device))
+                        video.write_frame(interp_frame)
 
-            video.writer.write(frame)
+            video.write_frame(frame)
         else:
-            video.writer.write(frame)
+            video.write_frame(frame)
 
         prev_frame = frame
         frame_idx += 1
@@ -311,11 +304,14 @@ def run_upscaling(input_path, output_path, model_name, scale, target_size_mb=Non
     log("info", "Starting frame upscaling...")
     frame_idx = 0
     black_warned = False
+    use_autocast = device.type == "cuda"
 
     for frame in video.read_frames():
         tensor = frame_to_tensor(frame, device)
+        if use_autocast:
+            tensor = tensor.to(memory_format=torch.channels_last)
 
-        with torch.no_grad():
+        with torch.no_grad(), torch.cuda.amp.autocast(enabled=use_autocast):
             upscaled = model(tensor)
 
         # Validate output on first frame
@@ -331,7 +327,7 @@ def run_upscaling(input_path, output_path, model_name, scale, target_size_mb=Non
 
         upscaled = torch.clamp(upscaled, 0, 1)
         result = tensor_to_frame(upscaled, str(device))
-        video.writer.write(result)
+        video.write_frame(result)
 
         frame_idx += 1
         denom = max(total_frames, 1)
