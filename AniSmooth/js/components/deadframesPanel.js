@@ -30,7 +30,7 @@
     addToQueue: function () {
       var s = this._sourceInfo;
       if (!s || !s.ok) {
-        alert("Select a footage layer in the timeline first.");
+        window.showToast("Select a footage layer in the timeline first.", "error");
         return;
       }
       var threshold = this.thresholdInput ? parseFloat(this.thresholdInput.value) : 0.05;
