@@ -269,11 +269,12 @@ def run_interpolation(input_path, output_path, model_name, factor, target_size_m
                         interp = tensor_to_frame(mid, str(device))
                         video.write_frame(interp)
                 else:
-                    
+                    # PyTorch path
                     t0 = frame_to_tensor(prev_frame, device).to(memory_format=torch.channels_last)
                     t1 = frame_to_tensor(frame, device).to(memory_format=torch.channels_last)
                     t0_padded, pad_info = pad_to_mod(t0, 32)
                     t1_padded, _ = pad_to_mod(t1, 32)
+                    model.cachePair(t0_padded, t1_padded)
                     with torch.no_grad(), torch.amp.autocast("cuda", enabled=device.type == "cuda"):
                         for f in range(1, factor):
                             alpha = f / factor

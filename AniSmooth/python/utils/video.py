@@ -21,6 +21,16 @@ def _find_ffmpeg():
         return which
     return None
 
+def _find_ffprobe():
+    script_dir = Path(__file__).parent.parent
+    local = script_dir / "ffprobe.exe"
+    if local.exists():
+        return str(local)
+    which = shutil.which("ffprobe")
+    if which:
+        return which
+    return None
+
 def mux_audio(video_path, audio_source_path):
     """
     Copy the audio stream from audio_source_path into video_path.
@@ -31,14 +41,15 @@ def mux_audio(video_path, audio_source_path):
         log("warn", "FFmpeg not found, cannot mux audio")
         return False
 
+    ffprobe = _find_ffprobe() or ffmpeg
     probe_cmd = [
-        ffmpeg, "-i", str(audio_source_path),
-        "-f", "null", "-"
+        ffprobe, "-v", "error", "-select_streams", "a", "-show_entries",
+        "stream=codec_type", "-of", "csv=p=0", str(audio_source_path)
     ]
     has_audio = False
     try:
-        r = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=30)
-        if "Audio:" in r.stderr:
+        r = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=10)
+        if "audio" in r.stdout.lower():
             has_audio = True
     except Exception:
         pass
@@ -142,19 +153,21 @@ def reencode_high_quality(video_path, x264_preset="slow", crf=17, tune="animatio
     return False
 
 def _probe_duration(ffmpeg, path):
-    """Return media duration in seconds via FFmpeg, or None if undeterminable."""
-    try:
-        r = subprocess.run([ffmpeg, "-i", str(path), "-f", "null", "-"],
-                           capture_output=True, text=True, timeout=30)
-        for line in r.stderr.split("\n"):
-            if "Duration:" in line:
-                raw = line.split("Duration:")[-1].strip().split(",")[0].strip()
-                if not raw or raw.upper().startswith("N/A"):
-                    return None
-                hh, mm, ss = raw.split(":")
-                return float(hh) * 3600 + float(mm) * 60 + float(ss)
-    except Exception:
+    """Return media duration in seconds via ffprobe (instant), or None."""
+    ffprobe = _find_ffprobe()
+    if not ffprobe:
         return None
+    try:
+        r = subprocess.run(
+            [ffprobe, "-v", "error", "-show_entries", "format=duration",
+             "-of", "default=noprint_wrappers=1:nokey=1", str(path)],
+            capture_output=True, text=True, timeout=10
+        )
+        dur = r.stdout.strip()
+        if dur and dur.replace(".", "").replace("-", "").isdigit():
+            return float(dur)
+    except Exception:
+        pass
     return None
 
 def reencode_to_size(video_path, audio_source_path, target_mb, x264_preset="slow", tune="animation"):
@@ -180,16 +193,21 @@ def reencode_to_size(video_path, audio_source_path, target_mb, x264_preset="slow
     has_audio = False
     audio_bitrate_kbps = 192
     try:
-        import re
-        r = subprocess.run([ffmpeg, "-i", str(audio_source_path), "-f", "null", "-"],
-                           capture_output=True, text=True, timeout=30)
-        for line in r.stderr.split("\n"):
-            if "Audio:" in line:
-                has_audio = True
-                m = re.search(r'(\d+)\s*kb/s', line)
-                if m:
-                    audio_bitrate_kbps = int(m.group(1))
-                break
+        ffprobe = _find_ffprobe()
+        if ffprobe:
+            r = subprocess.run(
+                [ffprobe, "-v", "error", "-select_streams", "a", "-show_entries",
+                 "stream=codec_type,bit_rate", "-of", "csv=p=0", str(audio_source_path)],
+                capture_output=True, text=True, timeout=10
+            )
+            for line in r.stdout.strip().split("\n"):
+                if line:
+                    parts = line.split(",")
+                    if len(parts) >= 1 and parts[0] == "audio":
+                        has_audio = True
+                        if len(parts) >= 2 and parts[1].isdigit():
+                            audio_bitrate_kbps = int(int(parts[1]) / 1000)
+                        break
     except Exception:
         pass
 

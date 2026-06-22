@@ -133,13 +133,22 @@ class IFNet(nn.Module):
         self.scale_list = [16 / scale, 8 / scale, 4 / scale, 2 / scale, 1 / scale]
         self.dynamicScale = dynamicScale
         self.blocks = [self.block0, self.block1, self.block2, self.block3, self.block4]
+        self.f0 = None
+        self.f1 = None
 
     def cacheReset(self, frame):
         self.f0 = self.encode(frame[:, :3])
+        self.f1 = None
 
-    def forward(self, img0, img1, timestep=0.5):
+    def cachePair(self, img0, img1):
         self.f0 = self.encode(img0[:, :3])
         self.f1 = self.encode(img1[:, :3])
+
+    def forward(self, img0, img1, timestep=0.5):
+        if self.f0 is None:
+            self.f0 = self.encode(img0[:, :3])
+        if self.f1 is None:
+            self.f1 = self.encode(img1[:, :3])
 
         if not isinstance(timestep, torch.Tensor):
             timestep = torch.tensor(timestep, dtype=img0.dtype, device=img0.device)
@@ -209,6 +218,7 @@ class IFNet(nn.Module):
 
         mask = torch.sigmoid(mask)
         result = warped_img0 * mask + warped_img1 * (1 - mask)
+        self.f0 = self.f1
         return result
 
 class RIFEModel(nn.Module):
@@ -217,6 +227,12 @@ class RIFEModel(nn.Module):
         self.model_version = model_version
         heavy = "heavy" in model_version
         self.flownet = IFNet(heavy=heavy)
+
+    def cacheReset(self, frame):
+        self.flownet.cacheReset(frame)
+
+    def cachePair(self, img0, img1):
+        self.flownet.cachePair(img0, img1)
 
     def forward(self, img0, img1, timestep=0.5):
         return self.flownet(img0, img1, timestep)

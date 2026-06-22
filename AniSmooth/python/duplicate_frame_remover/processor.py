@@ -76,7 +76,7 @@ def process_single_video(
             ffmpeg_proc = subprocess.Popen(
                 ffmpeg_cmd,
                 stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
                 stderr=subprocess.PIPE,
             )
         except Exception as e:
