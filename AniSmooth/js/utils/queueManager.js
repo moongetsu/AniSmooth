@@ -182,7 +182,13 @@
           self._notify();
         },
         onLog: function (l) {
-          dbg("debug", "Queue-Engine", l);
+          try {
+            var parsed = JSON.parse(l);
+            var level = parsed.type === 'error' ? 'error' : (parsed.type === 'warn' ? 'warn' : (parsed.type === 'success' ? 'success' : 'debug'));
+            dbg(level, "Queue-Engine", parsed.msg || l, item.mode);
+          } catch (e) {
+            dbg("debug", "Queue-Engine", l, item.mode);
+          }
         },
         onComplete: function () {
           self._currentProc = null;

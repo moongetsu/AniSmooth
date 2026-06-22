@@ -20,6 +20,15 @@
         });
       }
 
+      var cats = document.querySelectorAll('.console-cat');
+      cats.forEach(function(cat) {
+        cat.addEventListener('click', function() {
+          cats.forEach(function(c) { c.classList.remove('active'); });
+          this.classList.add('active');
+          window.setLogFilter('mode', this.dataset.mode);
+        });
+      });
+
       var clearBtn = document.getElementById('consoleClearBtn');
       if (clearBtn) {
         clearBtn.addEventListener('click', function() {
@@ -67,12 +76,14 @@
       logs.forEach(function(entry) {
         var timeStr = entry.time.toISOString().replace('T', ' ').substring(11, 19);
         var iconClass = ConsolePanel.getLevelIcon(entry.level);
+        var modeBadge = entry.mode ? '<span class="console-entry-mode">' + window.escapeHtmlLog(entry.mode) + '</span>' : '';
 
         html +=
           '<div class="console-entry console-' + entry.level + '">' +
           '  <div class="console-entry-header">' +
           '    <span class="console-entry-icon"><i class="' + iconClass + '"></i></span>' +
           '    <span class="console-entry-source">' + window.escapeHtmlLog(entry.source) + '</span>' +
+          modeBadge +
           '    <span class="console-entry-time">' + timeStr + '</span>' +
           '  </div>' +
           '  <div class="console-entry-message">' + window.escapeHtmlLog(entry.message) + '</div>' +

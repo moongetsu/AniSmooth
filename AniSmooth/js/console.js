@@ -1,14 +1,15 @@
 window.consoleLog = [];
 window.consoleMaxEntries = 500;
-window.consoleFilter = { level: 'all', source: 'all', search: '' };
+window.consoleFilter = { level: 'all', source: 'all', search: '', mode: 'all' };
 window.consoleSort = { by: 'time', order: 'asc' };
 
-function dbg(level, source, message) {
+function dbg(level, source, message, mode) {
   const entry = {
     time: new Date(),
     level: level,
     source: source,
-    message: String(message || '')
+    message: String(message || ''),
+    mode: mode || ''
   };
 
   window.consoleLog.push(entry);
@@ -35,6 +36,12 @@ function getFilteredAndSortedLogs() {
   if (filter.level !== 'all') {
     logs = logs.filter(function(entry) {
       return entry.level === filter.level;
+    });
+  }
+
+  if (filter.mode !== 'all') {
+    logs = logs.filter(function(entry) {
+      return entry.mode === filter.mode;
     });
   }
 
@@ -68,6 +75,7 @@ function getFilteredAndSortedLogs() {
 
 window.setLogFilter = function(type, value) {
   if (type === 'level') window.consoleFilter.level = value;
+  if (type === 'mode') window.consoleFilter.mode = value;
   if (type === 'search') window.consoleFilter.search = value;
   if (window.ConsolePanel && window.ConsolePanel.renderLogContent) window.ConsolePanel.renderLogContent();
 };
