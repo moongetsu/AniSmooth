@@ -143,6 +143,11 @@
       var nameWithoutExt = window.FileSystem.getFileNameWithoutExtension(inputPath);
       var outputName = res.isTemp ? nameWithoutExt.replace(/^AniSmooth_Render_\d+_?/, "") : nameWithoutExt;
       var outDir = (window.App && window.App.settings.outputPath) || window.FileSystem.os.homedir();
+      var modeFolder = item.mode === "upscale" ? "Upscaled" : (item.mode === "dedupe" ? "Deduped" : "Interpolated");
+      var modeDir = window.FileSystem.path.join(outDir, modeFolder);
+      var prerenderDir = window.FileSystem.path.join(outDir, "PreRenders");
+      window.FileSystem.createFolder(modeDir);
+      window.FileSystem.createFolder(prerenderDir);
       var suffix = item.mode === "upscale" ? "_upscaled_" : (item.mode === "dedupe" ? "_deduped" : "_interpolated_");
       var scaleKey = item.mode === "upscale" ? item.scale : item.factor;
       var settings = (window.App && window.App.settings) || {};
@@ -151,11 +156,11 @@
         ? "_" + new Date().toISOString().replace(/[:.]/g, "-").substring(0, 19)
         : "";
       var baseName = prefix + outputName + suffix + (item.mode === "dedupe" ? "" : scaleKey + "x") + ts;
-      var outputPath = window.FileSystem.path.join(outDir, baseName + "." + ext);
+      var outputPath = window.FileSystem.path.join(modeDir, baseName + "." + ext);
 
       var preRenderPath = null;
       if (res.isTemp && window.FileSystem && window.FileSystem.fs && window.FileSystem.path && settings.outputKeepPrerender !== false) {
-        preRenderPath = window.FileSystem.path.join(outDir, prefix + outputName + "_prerender" + ts + "." + ext);
+        preRenderPath = window.FileSystem.path.join(prerenderDir, prefix + outputName + "_prerender" + ts + "." + ext);
         try {
           window.FileSystem.fs.copyFileSync(inputPath, preRenderPath);
           dbg("info", "Queue", "Pre-render saved: " + preRenderPath);
