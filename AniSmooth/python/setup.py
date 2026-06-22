@@ -13,7 +13,6 @@ PIP_PACKAGES = [
     "opencv-python>=4.10.0.84",
     "numpy>=1.24.0,<3.0",
     "Pillow==10.2.0",
-    "onnx==1.15.0",
     "onnxruntime==1.17.1",
     "spandrel==0.3.4"
 ]
