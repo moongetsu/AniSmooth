@@ -17,7 +17,18 @@ function importFileToAE(filePath) {
     var comp = app.project.activeItem;
     if (comp && comp instanceof CompItem) {
       var layer = comp.layers.add(footage);
-      layer.startTime = comp.time;
+      
+      var selectedLayer = null;
+      if (comp.selectedLayers && comp.selectedLayers.length > 0) {
+        selectedLayer = comp.selectedLayers[0];
+      }
+      
+      if (selectedLayer) {
+        layer.startTime = selectedLayer.inPoint;
+        layer.moveAfter(selectedLayer);
+      } else {
+        layer.startTime = comp.time;
+      }
       
       if (footage.width > 0 && footage.height > 0 && comp.width > 0 && comp.height > 0) {
         var scaleX = (comp.width / footage.width) * 100;
