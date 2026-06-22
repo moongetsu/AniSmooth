@@ -495,7 +495,7 @@
         needs.push('PyTorch CPU');
       }
     }
-    needs.push('OpenCV + NumPy + Pillow');
+    needs.push('OpenCV + NumPy + Pillow + Spandrel');
     _totalSteps = needs.length;
     _installedCount = 0;
 

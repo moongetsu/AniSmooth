@@ -438,6 +438,8 @@
       var trt = info.tensorrt_available;
       var ptVariant = info.pytorch_variant || "cpu";
       var driverVer = info.nvidia_driver || "";
+      var spandrelVersion = info.spandrel_version || "";
+      var spandrelAvailable = info.spandrel_available;
 
       
       var indicator = document.getElementById("gpuIndicator");
@@ -522,6 +524,11 @@
         ptBadge.className = "gpu-badge " + (ptVariant === "cuda" ? "badge-ok" : "badge-warn");
         ptBadge.innerHTML = '<i class="fa-solid fa-' + (ptVariant === "cuda" ? 'check' : 'exclamation') + '"></i> PyTorch ' + ptVariant.toUpperCase();
         badgesEl.appendChild(ptBadge);
+
+        var srBadge = document.createElement("span");
+        srBadge.className = "gpu-badge " + (spandrelAvailable ? "badge-ok" : "badge-err");
+        srBadge.innerHTML = '<i class="fa-solid fa-' + (spandrelAvailable ? 'check' : 'xmark') + '"></i> Spandrel';
+        badgesEl.appendChild(srBadge);
       }
 
       var details = document.getElementById("gpuDetails");
@@ -996,6 +1003,17 @@
 
       
       rows.push({ icon: "fa-solid fa-image", label: "OpenCV", value: "Check GPU tab", ok: null });
+
+      
+      (function () {
+        var spVer = "";
+        var spOk = null;
+        if (this._gpuInfoCache) {
+          spOk = this._gpuInfoCache.spandrel_available;
+          spVer = this._gpuInfoCache.spandrel_version || "";
+        }
+        rows.push({ icon: "fa-solid fa-puzzle-piece", label: "Spandrel", value: spOk ? ("v" + spVer) : (spOk === false ? "Not installed" : "Check GPU tab"), ok: spOk });
+      }).call(this);
 
       
       (function () {

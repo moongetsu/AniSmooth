@@ -116,7 +116,16 @@ def get_gpu_info():
         "nvidia_driver": nvidia["driver_version"] if nvidia else None,
         "nvidia_cuda_ver": nvidia["cuda_driver_version"] if nvidia else None,
         "nvidia_vram_mb": nvidia["memory_total_mb"] if nvidia else 0,
+        "spandrel_available": False,
+        "spandrel_version": None,
     }
+
+    try:
+        import spandrel
+        info["spandrel_available"] = True
+        info["spandrel_version"] = spandrel.__version__
+    except ImportError:
+        pass
 
     if torch_cuda:
         info["gpu_count"] = torch.cuda.device_count()
