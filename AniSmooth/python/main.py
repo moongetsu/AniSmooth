@@ -331,8 +331,6 @@ def run_upscaling(input_path, output_path, model_name, scale, target_size_mb=Non
 
         for frame in video.read_frames():
             tensor = frame_to_tensor(frame, device)
-            if use_autocast:
-                tensor = tensor.to(memory_format=torch.channels_last)
 
             with torch.no_grad(), torch.amp.autocast("cuda", enabled=use_autocast):
                 upscaled = model(tensor)
