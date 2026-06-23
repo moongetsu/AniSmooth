@@ -65,7 +65,7 @@
       if (queue.length === 0) {
         container.innerHTML =
           '<div class="queue-empty">' +
-            '<img src="' + ((window.AniSmoothTheme && window.AniSmoothTheme.getLogo("iconOnly")) || "./AniSmooth Logo-Only.png") + '" alt="AniSmooth Logo" style="height: 54px; width: auto; object-fit: contain; opacity: 0.15; margin-bottom: 6px;">' +
+            '<img src="' + ((window.AniSmoothTheme && window.AniSmoothTheme.getLogo("iconOnly")) || "./images/AniSmooth-Logo-Only.png") + '" alt="AniSmooth Logo" style="height: 54px; width: auto; object-fit: contain; opacity: 0.15; margin-bottom: 6px;">' +
             '<p>Queue is empty</p>' +
             '<span>Add jobs from the Interpolation or Upscale tabs</span>' +
           '</div>';

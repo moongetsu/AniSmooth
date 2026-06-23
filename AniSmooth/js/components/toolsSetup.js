@@ -103,7 +103,7 @@
   
   function renderWelcomeStep() {
     return '<div class="setup-card">' +
-      '<div class="setup-logo" style="text-align: center; margin-bottom: 12px;"><img src="' + ((window.AniSmoothTheme && window.AniSmoothTheme.getLogo("iconOnly")) || "./AniSmooth Logo-Only.png") + '" alt="AniSmooth Logo" style="height: 72px; width: auto; object-fit: contain; display: inline-block;"></div>' +
+      '<div class="setup-logo" style="text-align: center; margin-bottom: 12px;"><img src="' + ((window.AniSmoothTheme && window.AniSmoothTheme.getLogo("iconOnly")) || "./images/AniSmooth-Logo-Only.png") + '" alt="AniSmooth Logo" style="height: 72px; width: auto; object-fit: contain; display: inline-block;"></div>' +
       '<h1>AniSmooth Setup</h1>' +
       '<p class="setup-desc">This wizard detects your hardware and installs everything needed to run local AI models for frame interpolation and upscaling.</p>' +
       '<div class="setup-info-box">' +

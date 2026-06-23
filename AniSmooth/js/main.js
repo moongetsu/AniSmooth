@@ -1874,10 +1874,9 @@
           ? "./images/AniSmooth-Light-Logo-Only.png"
           : "./images/AniSmooth-Light-Logo.png";
       }
-      // dark (default) — note the SPACE in the icon-only filename
       return kind === "iconOnly"
-        ? "./AniSmooth Logo-Only.png"
-        : "./AniSmooth-Logo.png";
+        ? "./images/AniSmooth-Logo-Only.png"
+        : "./images/AniSmooth-Logo.png";
     }
   };
 
