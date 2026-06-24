@@ -273,20 +273,31 @@ def run_interpolation(input_path, output_path, model_name, factor, target_size_m
                         interp = tensor_to_frame(mid, str(device))
                         video.write_frame(interp)
                 else:
-                    # PyTorch path
-                    t0 = frame_to_tensor(prev_frame, device)
-                    t1 = frame_to_tensor(frame, device)
+                    # PyTorch path — channels_last keeps CuDNN on the same
+                    # kernel path as when the model was tuned; without it
+                    # non-deterministic CuDNN kernel selection can shift
+                    # intermediate activations enough to produce wrong flow.
+                    t0 = frame_to_tensor(prev_frame, device).to(memory_format=torch.channels_last)
+                    t1 = frame_to_tensor(frame, device).to(memory_format=torch.channels_last)
                     t0_padded, pad_info = pad_to_mod(t0, 32)
                     t1_padded, _ = pad_to_mod(t1, 32)
-                    model.cachePair(t0_padded, t1_padded)
                     with torch.no_grad(), torch.amp.autocast("cuda", enabled=device.type == "cuda"):
+                        model.cachePair(t0_padded, t1_padded)
+                        # Save encoded features: IFNet.forward mutates f0←f1
+                        # after each call, so multi-step (factor≥3) would use
+                        # f1 for both on 2nd+ iterations — wrong flow.
+                        saved_f0 = model.flownet.f0
+                        saved_f1 = model.flownet.f1
                         for f in range(1, factor):
+                            model.flownet.f0 = saved_f0
+                            model.flownet.f1 = saved_f1
                             alpha = f / factor
                             mid = model(t0_padded, t1_padded, alpha)
                             mid = unpad(mid, pad_info)
                             interp_frame = tensor_to_frame(mid.float(), str(device))
                             video.write_frame(interp_frame)
                             del mid, interp_frame
+                        del saved_f0, saved_f1
                     del t0, t1, t0_padded, t1_padded
 
                 video.write_frame(frame)
