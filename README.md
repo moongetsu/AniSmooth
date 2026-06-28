@@ -15,7 +15,9 @@
 
 <hr>
 
-**AniSmooth** is a free, local After Effects extension: remove duplicate frames, smooth video with RIFE/Flowframes, and upscale clips on your own GPU via a Python backend. Small, clean codebase — loads instantly without slowing AE down.
+**AniSmooth** is a free, local After Effects extension: remove duplicate frames, smooth video with RIFE/Flowframes, and upscale clips on your own GPU via a Python backend.
+
+Unlike other large and heavy extensions, AniSmooth is built with a **small, clean, and highly compact codebase**. The code is split into simple, organized files to ensure the extension loads instantly and runs smoothly alongside other tools without slowing down After Effects.
 
 > [!NOTE]
 > **Compatibility:** After Effects CC 2018 → CC 2026+ (v15.0+). Windows primary support.
