@@ -2,6 +2,11 @@
 
 Free local After Effects extension for AI frame interpolation and video upscaling. Windows-only. NVIDIA GPU required.
 
+## AI Agent Instructions
+
+- **Update this file** when adding/removing files, changing architecture, adding new build steps, or introducing conventions.
+- **Commit style:** prefix tag in parentheses — `(add)` new features, `(fix)` bug fixes, `(update)` refactors/formatting/chores. Title case after colon. Example: `(fix) Clamp work area bounds to prevent AE out-of-range error`.
+
 ## Build & Run
 
 ```bash
