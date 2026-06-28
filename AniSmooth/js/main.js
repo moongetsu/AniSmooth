@@ -83,7 +83,7 @@
       this.initSettingsPanel();
 
       this.bindGlobalEvents();
-      this.switchTab("deadframes");
+      this.switchTab(this._firstVisibleTab());
 
       dbg('info', 'App', 'AniSmooth initialized successfully.');
 
@@ -913,6 +913,14 @@
           self._applyTabVisibility();
         });
       }
+    },
+
+    _firstVisibleTab: function () {
+      for (var i = 0; i < this._tabConfig.length; i++) {
+        var id = this._tabConfig[i].id;
+        if (window.StorageManager.getItem("anismooth_tab_" + id, "1") !== "0") return id;
+      }
+      return "settings";
     },
 
     _applyTabVisibility: function () {
