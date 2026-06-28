@@ -84,35 +84,24 @@
         return;
       }
       toggle.style.display = '';
+      var verSelect = document.getElementById('flowframesVersionSelect');
       var currentVer = (window.App && window.App.settings && window.App.settings.flowframesVersionActive) || "1.36.0";
-      var buttons = toggle.querySelectorAll('.pill-btn');
-      for (var j = 0; j < buttons.length; j++) {
-        if (buttons[j].getAttribute('data-ff-ver') === currentVer) buttons[j].classList.add('active');
-        else buttons[j].classList.remove('active');
-      }
+      if (verSelect) verSelect.value = currentVer;
       var s = this;
-      toggle.addEventListener('click', function (e) {
-        var btn = e.target;
-        while (btn && btn !== toggle) {
-          if (btn.classList && btn.classList.contains('pill-btn')) break;
-          btn = btn.parentElement;
-        }
-        if (!btn || btn === toggle) return;
-        var ver = btn.getAttribute('data-ff-ver');
-        if (!ver || ver === currentVer) return;
-        currentVer = ver;
-        var btns = toggle.querySelectorAll('.pill-btn');
-        for (var k = 0; k < btns.length; k++) btns[k].classList.remove('active');
-        btn.classList.add('active');
-        if (window.App && window.App.settings) {
-          window.App.settings.flowframesVersionActive = ver;
-          window.StorageManager.setItem("anismooth_flowframes_version_active", ver);
-        }
-        s.applyVersion();
-        s.applyAiFilter();
-        s.checkAvailability();
-        dbg('info', 'Flowframes', 'Version switched to: ' + ver);
-      });
+      if (verSelect) {
+        verSelect.addEventListener('change', function () {
+          var ver = verSelect.value;
+          if (!ver) return;
+          if (window.App && window.App.settings) {
+            window.App.settings.flowframesVersionActive = ver;
+            window.StorageManager.setItem("anismooth_flowframes_version_active", ver);
+          }
+          s.applyVersion();
+          s.applyAiFilter();
+          s.checkAvailability();
+          dbg('info', 'Flowframes', 'Version switched to: ' + ver);
+        });
+      }
     },
 
     applyAiFilter: function () {

@@ -4,8 +4,16 @@
             <i class="fa-solid fa-wand-magic-sparkles panel-head-icon"></i>
             <span class="panel-title">Flowframes Interpolation</span>
             <span class="panel-head-right" id="ffVersionToggle" style="display:none;">
-              <button class="pill-btn pill-left active" data-ff-ver="1.36.0">1.36</button>
-              <button class="pill-btn pill-right" data-ff-ver="1.42.0">1.42</button>
+              <div class="custom-select" id="flowframesVersionSelect">
+                <div class="select-trigger">
+                  <span class="select-value">1.36</span>
+                  <i class="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+                <div class="select-options">
+                  <div class="select-option active" data-value="1.36.0" data-label="1.36">1.36.0 (free)</div>
+                  <div class="select-option" data-value="1.42.0" data-label="1.42">1.42.0 (Patreon)</div>
+                </div>
+              </div>
             </span>
           </div>
           <div class="form-group">
