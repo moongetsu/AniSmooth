@@ -138,7 +138,7 @@ Python stdout format: `{"type":"info|warn|error|success|progress","msg":"...","p
 |---|---|
 | `queueManager.js` | `_processNext()` dispatches serial queue. `_running` flag guards re-entrancy. See `_render()` → `_runModel()` → `ModelHandler.*Clip()` chain |
 | `modelHandler.js` | Singleton `activeProcess` + `_cancelling` flag prevents concurrent Python spawns. `executeModel()` spawns, `cancelActiveProcess()` kills via `taskkill /F /T` |
-| `host.jsx` | `renderSelectedLayer()` renders one layer to a temp AVI. **Time-coord trap:** `layer.inPoint/outPoint` are DISPLAY-relative (offset by `displayStartTime`); `comp.workAreaStart` AND `RenderQueueItem.timeSpanStart` are ABSOLUTE 0-based (range `[0, duration]`). Convert via `toAbsRenderTime()` before assigning either, or AE throws "value out of range" / renders blank frames |
+| `host.jsx` | `renderSelectedLayer()` renders one layer to a temp AVI. **Time-coord trap — three different spaces:** `layer.inPoint/outPoint` are DISPLAY-relative (offset by `displayStartTime`); `comp.workAreaStart` is ABSOLUTE 0-based (range `[0, duration]`); `RenderQueueItem.timeSpanStart` is DISPLAY-relative (range `[displayStartTime, displayStartTime+duration]`). Compute `absStart = toAbsRenderTime(inPoint)`, then `workAreaStart = absStart` but `timeSpanStart = absStart + displayStartTime`. Mixing them throws "value out of range" or the "timeSpanStart of 0 ... blank frames" warning (one-frame render). `importFileToAE()`: capture `selectedLayers` BEFORE `layers.add()` — add reselects to the new layer, so `moveAfter` would target itself |
 | `main.py` | `argparse` → dispatch. Quality presets at top of file. Scene detection threshold: 0.40 |
 
 ## Python Path Resolution

@@ -36,14 +36,17 @@ function importFileToAE(filePath) {
     
     var comp = app.project.activeItem;
     if (comp && comp instanceof CompItem) {
-      var layer = comp.layers.add(footage);
-      
+      // Capture selection BEFORE add() — adding a layer makes the new layer the
+      // only selected one, so reading selectedLayers afterwards returns itself
+      // and moveAfter() throws "Can not move a layer before or after itself".
       var selectedLayer = null;
       if (comp.selectedLayers && comp.selectedLayers.length > 0) {
         selectedLayer = comp.selectedLayers[0];
       }
-      
-      if (selectedLayer) {
+
+      var layer = comp.layers.add(footage);
+
+      if (selectedLayer && selectedLayer !== layer) {
         layer.startTime = selectedLayer.inPoint;
         layer.moveAfter(selectedLayer);
       } else {
@@ -298,10 +301,15 @@ function renderSelectedLayer(outputPathDir, layerName, layerIndex) {
     comp.workAreaStart = absStart;
     comp.workAreaDuration = absEnd - absStart;
 
-    // RenderQueueItem.timeSpanStart is ABSOLUTE 0-based time (issues #1 & #2).
+    // Coordinate-space trap: comp.workAreaStart is ABSOLUTE (set above), but
+    // RenderQueueItem.timeSpanStart is DISPLAY-relative — its valid range is
+    // [displayStartTime, displayStartTime + duration]. Assigning the absolute
+    // start (0 when displayStartTime != 0) triggers AE's "timeSpanStart of 0
+    // seconds ... frames outside range" warning and renders blank/one frame.
+    // Duration is identical in both spaces; only the start needs the offset.
     var absDur = absEnd - absStart;
     if (absDur < fd) absDur = Math.min(fd, comp.duration - absStart);
-    item.timeSpanStart = absStart;
+    item.timeSpanStart = absStart + comp.displayStartTime;
     item.timeSpanDuration = absDur;
     
     
