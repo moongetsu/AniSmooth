@@ -55,17 +55,6 @@
           s._renderSafe('factorInfo');
         });
       }
-      var sceneSlider = document.getElementById('interpSceneThreshold');
-      var sceneVal = document.getElementById('interpSceneVal');
-      if (sceneSlider && sceneVal) {
-        var updateSceneLabel = function () {
-          var v = parseFloat(sceneSlider.value);
-          var label = v === 0.40 ? '0.40 \u2014 Default' : (v < 0.40 ? v.toFixed(2) + ' \u2014 More sensitive (catches more changes)' : v.toFixed(2) + ' \u2014 Less sensitive (catches fewer changes)');
-          sceneVal.textContent = label;
-        };
-        sceneSlider.addEventListener('input', updateSceneLabel);
-        updateSceneLabel();
-      }
       var enableTargetSize = document.getElementById('interpEnableTargetSize');
       var targetSizeInput = document.getElementById('interpTargetSize');
       var targetSizeRow = enableTargetSize ? enableTargetSize.closest('.toggle-row') : null;
@@ -213,8 +202,6 @@
       var targetSize = (enableTargetSize && enableTargetSize.checked) ? (parseFloat(document.getElementById('interpTargetSize').value) || 0) : 0;
       var presetEl = document.getElementById('interpPreset');
       var preset = presetEl ? presetEl.value : 'high';
-      var sceneEl = document.getElementById('interpSceneThreshold');
-      var sceneThreshold = sceneEl ? parseFloat(sceneEl.value) : 0.40;
       window.QueueManager.add({
         mode: 'interpolate',
         task: 'Interpolation',
@@ -226,8 +213,7 @@
         height: s.height || 0,
         fps: s.frameRate || s.compFrameRate || 0,
         targetSizeMb: targetSize,
-        preset: preset,
-        sceneThreshold: sceneThreshold
+        preset: preset
       });
       this.app.switchTab('queue');
     },
