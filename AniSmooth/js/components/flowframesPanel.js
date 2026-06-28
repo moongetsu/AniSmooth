@@ -65,6 +65,11 @@
     initVersionToggle: function () {
       var toggle = document.getElementById('ffVersionToggle');
       if (!toggle) return;
+      var settingsVer = (window.App && window.App.settings && window.App.settings.flowframesVersion) || "1.36.0";
+      if (settingsVer !== "both") {
+        toggle.style.display = 'none';
+        return;
+      }
       if (!window.FlowframesHandler || !window.FlowframesHandler.availableVersions) {
         toggle.style.display = 'none';
         return;
@@ -79,7 +84,7 @@
         return;
       }
       toggle.style.display = '';
-      var currentVer = (window.App && window.App.settings && window.App.settings.flowframesVersion) || "1.36.0";
+      var currentVer = (window.App && window.App.settings && window.App.settings.flowframesVersionActive) || "1.36.0";
       var buttons = toggle.querySelectorAll('.pill-btn');
       for (var j = 0; j < buttons.length; j++) {
         if (buttons[j].getAttribute('data-ff-ver') === currentVer) buttons[j].classList.add('active');
@@ -100,9 +105,8 @@
         for (var k = 0; k < btns.length; k++) btns[k].classList.remove('active');
         btn.classList.add('active');
         if (window.App && window.App.settings) {
-          window.App.settings.flowframesVersion = ver;
-          window.StorageManager.setItem("anismooth_flowframes_version", ver);
-          if (window.App._filterVersionLabels) window.App._filterVersionLabels();
+          window.App.settings.flowframesVersionActive = ver;
+          window.StorageManager.setItem("anismooth_flowframes_version_active", ver);
         }
         s.applyVersion();
         s.applyAiFilter();
@@ -118,7 +122,7 @@
       var firstVisible = null;
       var currentVal = this.modelSelect.value;
       var currentVisible = false;
-      var version = (window.App && window.App.settings && window.App.settings.flowframesVersion) || "1.36.0";
+      var version = window.FlowframesHandler && window.FlowframesHandler.getEffectiveVersion ? window.FlowframesHandler.getEffectiveVersion() : "1.36.0";
       for (var j = 0; j < options.length; j++) {
         var optAi = options[j].getAttribute('data-ff-ai') || '';
         var optVer = options[j].getAttribute('data-ff-version') || '';
@@ -145,7 +149,7 @@
     },
 
     applyVersion: function () {
-      var version = (window.App && window.App.settings && window.App.settings.flowframesVersion) || "1.36.0";
+      var version = window.FlowframesHandler && window.FlowframesHandler.getEffectiveVersion ? window.FlowframesHandler.getEffectiveVersion() : "1.36.0";
       var selects = this.view ? this.view.querySelectorAll('.custom-select') : null;
       if (selects) {
         for (var i = 0; i < selects.length; i++) {

@@ -7,6 +7,7 @@
       flowframesPath136: "",
       flowframesPath142: "",
       flowframesVersion: "1.36.0",
+      flowframesVersionActive: "1.36.0",
       outputPrefix: "AniSmooth",
       outputTimestamp: true,
       outputAutoImport: true,
@@ -67,6 +68,7 @@
       this.settings.flowframesPath136 = window.StorageManager.getItem("anismooth_flowframes_path_136") || "";
       this.settings.flowframesPath142 = window.StorageManager.getItem("anismooth_flowframes_path_142") || "";
       this.settings.flowframesVersion = window.StorageManager.getItem("anismooth_flowframes_version") || "1.36.0";
+      this.settings.flowframesVersionActive = window.StorageManager.getItem("anismooth_flowframes_version_active") || "1.36.0";
       this.settings.outputPrefix = window.StorageManager.getItem("anismooth_output_prefix") || "AniSmooth";
       this.settings.outputTimestamp = window.StorageManager.getItem("anismooth_output_timestamp", "1") === "1";
       this.settings.outputAutoImport = window.StorageManager.getItem("anismooth_output_autoimport", "1") === "1";
@@ -1195,7 +1197,7 @@
           var val = child.getAttribute("data-value");
           if (!val) continue;
           var optVer = child.getAttribute('data-ff-version') || '';
-          var versionMatch = !optVer || optVer.split(/\s+/).indexOf(version) !== -1;
+          var versionMatch = version === "both" || !optVer || optVer.split(/\s+/).indexOf(version) !== -1;
           var toggled = window.StorageManager.getItem(prefix + val, "1") !== "0";
           var visible = versionMatch && toggled;
           child._visible = visible;
@@ -1726,7 +1728,7 @@
       var labels = document.querySelectorAll('[data-ff-version-label]');
       for (var i = 0; i < labels.length; i++) {
         var verAttr = labels[i].getAttribute('data-ff-version-label') || '';
-        labels[i].style.display = (verAttr.split(/\s+/).indexOf(version) !== -1) ? '' : 'none';
+        labels[i].style.display = (version === "both" || verAttr.split(/\s+/).indexOf(version) !== -1) ? '' : 'none';
       }
       if (window.FlowframesPanel && window.FlowframesPanel.applyVersion) {
         window.FlowframesPanel.applyVersion();

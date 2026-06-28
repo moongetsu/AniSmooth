@@ -9,7 +9,7 @@
         var fs = window.FileSystem.fs;
         var path = window.FileSystem.path;
         var settings = window.App && window.App.settings;
-        var version = (settings && settings.flowframesVersion) || "1.36.0";
+        var version = this.getEffectiveVersion();
         var versionPath = version === "1.36.0" ? (settings && settings.flowframesPath136) : (settings && settings.flowframesPath142);
         if (versionPath && fs.existsSync(versionPath)) return versionPath;
         var configured = settings && settings.flowframesPath;
@@ -25,6 +25,13 @@
 
     isAvailable: function () {
       return !!this.findExe();
+    },
+
+    getEffectiveVersion: function () {
+      var settings = window.App && window.App.settings;
+      var ver = (settings && settings.flowframesVersion) || "1.36.0";
+      if (ver === "both") return (settings && settings.flowframesVersionActive) || "1.36.0";
+      return ver;
     },
 
     availableVersions: function () {
@@ -77,7 +84,7 @@
 
       var logsDir = path.join(path.dirname(exe), "FlowframesData", "logs");
 
-      var version = (window.App && window.App.settings && window.App.settings.flowframesVersion) || "1.36.0";
+      var version = this.getEffectiveVersion();
       var isLegacy = version === "1.36.0";
 
       var args = isLegacy
