@@ -4,6 +4,7 @@
       outputPath: "",
       pythonPath: "python",
       flowframesPath: "",
+      flowframesVersion: "1.36.0",
       outputPrefix: "AniSmooth",
       outputTimestamp: true,
       outputAutoImport: true,
@@ -61,6 +62,7 @@
       this.settings.outputPath = window.StorageManager.getItem("anismooth_output_path") || this.defaultDownloadFolder;
       this.settings.pythonPath = window.StorageManager.getItem("anismooth_python_path") || "python";
       this.settings.flowframesPath = window.StorageManager.getItem("anismooth_flowframes_path") || "";
+      this.settings.flowframesVersion = window.StorageManager.getItem("anismooth_flowframes_version") || "1.36.0";
       this.settings.outputPrefix = window.StorageManager.getItem("anismooth_output_prefix") || "AniSmooth";
       this.settings.outputTimestamp = window.StorageManager.getItem("anismooth_output_timestamp", "1") === "1";
       this.settings.outputAutoImport = window.StorageManager.getItem("anismooth_output_autoimport", "1") === "1";
@@ -329,6 +331,16 @@
           self.settings.flowframesPath = ffInput.value.trim();
           window.StorageManager.setItem("anismooth_flowframes_path", self.settings.flowframesPath);
           if (window.FlowframesPanel && window.FlowframesPanel.checkAvailability) window.FlowframesPanel.checkAvailability();
+        });
+      }
+
+      var ffVer = document.getElementById("flowframesVersion");
+      if (ffVer) {
+        ffVer.value = this.settings.flowframesVersion;
+        ffVer.addEventListener("change", function () {
+          self.settings.flowframesVersion = ffVer.value;
+          window.StorageManager.setItem("anismooth_flowframes_version", ffVer.value);
+          dbg('info', 'Settings', 'Flowframes version set to: ' + ffVer.value);
         });
       }
 
