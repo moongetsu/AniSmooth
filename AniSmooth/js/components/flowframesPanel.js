@@ -12,6 +12,7 @@
       this._sourceInfo = null;
       this.bindEvents();
       this.checkAvailability();
+      this.renderFactorInfo();
     },
 
     getFactor: function () {
@@ -41,12 +42,14 @@
           for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
           el.classList.add('active');
           if (s.factorCustom) s.factorCustom.value = '';
+          s.renderFactorInfo();
         });
       }
       if (this.factorCustom) {
         this.factorCustom.addEventListener('input', function () {
           var btns = s.factorContainer.querySelectorAll('.factor-btn');
           for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+          s.renderFactorInfo();
         });
       }
     },
@@ -77,7 +80,20 @@
         s._lastRaw = raw;
         try { s._sourceInfo = JSON.parse(raw); } catch (e) { s._sourceInfo = null; }
         s.renderLayerInfo();
+        s.renderFactorInfo();
       });
+    },
+
+    renderFactorInfo: function () {
+      var el = document.getElementById('ffFactorInfo');
+      if (!el) return;
+      var f = this.getFactor();
+      var s = this._sourceInfo;
+      var fps = (s && s.ok) ? (s.frameRate || s.compFrameRate || 0) : 0;
+      var line = fps > 0
+        ? '<i class="fa-solid fa-arrow-right"></i> ' + fps.toFixed(2) + ' fps → <b class="meta-hi">' + (fps * f).toFixed(2) + ' fps</b>'
+        : '<i class="fa-solid fa-arrow-right"></i> ×<b>' + f + '</b> · ' + (f - 1) + ' new frames per pair';
+      el.innerHTML = '<span class="meta-strip meta-strip-sm">' + line + '</span>';
     },
 
     renderLayerInfo: function () {
