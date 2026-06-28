@@ -955,6 +955,40 @@
       if (interpEl) interpEl.innerHTML = this._buildToggleGroup(interpModels, "anismooth_model_interp_");
       if (upscaleEl) upscaleEl.innerHTML = this._buildToggleGroup(upscaleModels, "anismooth_model_upscale_");
 
+      var ffAiEl = document.getElementById("ffAiToggles");
+      var ffModelEl = document.getElementById("ffModelToggles");
+      var ffEncEl = document.getElementById("ffEncToggles");
+
+      var ffAi = [
+        { value: "RifeNcnn", label: "RIFE (NCNN)", icon: "fa-microchip" },
+        { value: "RifeNcnnVs", label: "RIFE (NCNN/VS)", icon: "fa-microchip" },
+        { value: "DainNcnn", label: "DAIN (NCNN)", icon: "fa-microchip" }
+      ];
+      var ffModels = [
+        { value: "RIFE 4.26", label: "RIFE 4.26", icon: "fa-cube" },
+        { value: "RIFE 4.25", label: "RIFE 4.25", icon: "fa-cube" },
+        { value: "RIFE 4.24", label: "RIFE 4.24", icon: "fa-cube" },
+        { value: "RIFE 4.22", label: "RIFE 4.22", icon: "fa-cube" },
+        { value: "RIFE 4.18", label: "RIFE 4.18", icon: "fa-cube" },
+        { value: "RIFE 4.13", label: "RIFE 4.13", icon: "fa-cube" },
+        { value: "RIFE 4.9", label: "RIFE 4.9", icon: "fa-cube" },
+        { value: "RIFE 2.3", label: "RIFE 2.3", icon: "fa-cube" }
+      ];
+      var ffEnc = [
+        { value: "X264", label: "h264", icon: "fa-film" },
+        { value: "Nvenc264", label: "h264 NVENC", icon: "fa-bolt" },
+        { value: "Amf264", label: "h264 AMF", icon: "fa-bolt" },
+        { value: "X265", label: "h265", icon: "fa-film" },
+        { value: "Nvenc265", label: "h265 NVENC", icon: "fa-bolt" },
+        { value: "Amf265", label: "h265 AMF", icon: "fa-bolt" },
+        { value: "SvtAv1", label: "AV1", icon: "fa-film" },
+        { value: "NvencAv1", label: "AV1 NVENC", icon: "fa-bolt" }
+      ];
+
+      if (ffAiEl) ffAiEl.innerHTML = this._buildToggleGroup(ffAi, "anismooth_ff_ai_");
+      if (ffModelEl) ffModelEl.innerHTML = this._buildToggleGroup(ffModels, "anismooth_ff_model_");
+      if (ffEncEl) ffEncEl.innerHTML = this._buildToggleGroup(ffEnc, "anismooth_ff_enc_");
+
       var allToggles = document.querySelectorAll(".model-vis-toggle");
       for (var i = 0; i < allToggles.length; i++) {
         allToggles[i].addEventListener("change", function () {
@@ -988,6 +1022,12 @@
       var upscaleSelect = document.getElementById("upscaleModel");
       if (interpSelect) filterSelect(interpSelect, "anismooth_model_interp_");
       if (upscaleSelect) filterSelect(upscaleSelect, "anismooth_model_upscale_");
+      var ffAiSelect = document.getElementById("flowframesAi");
+      var ffModelSelect = document.getElementById("flowframesModel");
+      var ffEncSelect = document.getElementById("flowframesEncoder");
+      if (ffAiSelect) filterSelect(ffAiSelect, "anismooth_ff_ai_");
+      if (ffModelSelect) filterSelect(ffModelSelect, "anismooth_ff_model_");
+      if (ffEncSelect) filterSelect(ffEncSelect, "anismooth_ff_enc_");
 
       function filterSelect(select, prefix) {
         var children = select.querySelectorAll(".select-options")[0].children;
