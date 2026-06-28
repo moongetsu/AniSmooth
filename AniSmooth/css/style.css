@@ -73,6 +73,7 @@
   --dot-d: #f59e0b;
   --dot-o: #6b7280;
   --dot-p: #10b981;
+  --dot-f: #ec4899;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -534,6 +535,7 @@ input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accen
 .preset-row-tags { display: flex; gap: 2px; flex-shrink: 0; }
 .preset-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 .preset-dot-i { background: var(--dot-i); }
+.preset-dot-f { background: var(--dot-f); }
 .preset-dot-u { background: var(--dot-u); }
 .preset-dot-d { background: var(--dot-d); }
 .preset-dot-o { background: var(--dot-o); }

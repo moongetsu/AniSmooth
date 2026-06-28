@@ -296,7 +296,8 @@
       var self = this;
       var autoSaveInputs = [
         "interpolationModel", "upscaleModel", "upscaleScale",
-        "deadframeThreshold", "pythonPathInput", "interpolationFactor"
+        "deadframeThreshold", "pythonPathInput", "interpolationFactor",
+        "flowframesAi", "flowframesModel", "flowframesEncoder", "flowframesFactor"
       ];
       for (var ai = 0; ai < autoSaveInputs.length; ai++) {
         var el = document.getElementById(autoSaveInputs[ai]);
@@ -1428,10 +1429,29 @@
         if (active) factor = parseInt(active.getAttribute("data-value"), 10) || 2;
       }
 
+      var ffAi = document.getElementById("flowframesAi");
+      var ffModel = document.getElementById("flowframesModel");
+      var ffEnc = document.getElementById("flowframesEncoder");
+      var ffFactorBtns = document.getElementById("flowframesFactor");
+      var ffFactorCustom = document.getElementById("ffFactorCustom");
+      var ffFactor = 2;
+      if (ffFactorCustom && ffFactorCustom.value) {
+        ffFactor = parseInt(ffFactorCustom.value, 10) || 2;
+      } else if (ffFactorBtns) {
+        var ffActive = ffFactorBtns.querySelector(".factor-btn.active");
+        if (ffActive) ffFactor = parseInt(ffActive.getAttribute("data-value"), 10) || 2;
+      }
+
       return {
         interpolation: {
           model: modelInt ? modelInt.value : "rife4.25-heavy",
           factor: factor
+        },
+        flowframes: {
+          ai: ffAi ? ffAi.value : "RifeNcnn",
+          model: ffModel ? ffModel.value : "RIFE 4.26",
+          encoder: ffEnc ? ffEnc.value : "X264",
+          factor: ffFactor
         },
         upscale: {
           model: modelUps ? modelUps.value : "adore",
@@ -1474,6 +1494,30 @@
           }
         }
         if (window.InterpolationPanel) window.InterpolationPanel._renderSafe("modelInfo");
+      }
+      if (state.flowframes) {
+        var ffAi = document.getElementById("flowframesAi");
+        if (ffAi && state.flowframes.ai) ffAi.value = state.flowframes.ai;
+        var ffModel = document.getElementById("flowframesModel");
+        if (ffModel && state.flowframes.model) ffModel.value = state.flowframes.model;
+        var ffEnc = document.getElementById("flowframesEncoder");
+        if (ffEnc && state.flowframes.encoder) ffEnc.value = state.flowframes.encoder;
+        if (state.flowframes.factor) {
+          var ffc = document.getElementById("ffFactorCustom");
+          var ffb = document.getElementById("flowframesFactor");
+          if (ffc) ffc.value = "";
+          var ffMatched = false;
+          if (ffb) {
+            var ffbtns = ffb.querySelectorAll(".factor-btn");
+            for (var fi = 0; fi < ffbtns.length; fi++) {
+              var fv = parseInt(ffbtns[fi].getAttribute("data-value"), 10);
+              if (fv === state.flowframes.factor) { ffbtns[fi].classList.add("active"); ffMatched = true; }
+              else ffbtns[fi].classList.remove("active");
+            }
+          }
+          if (!ffMatched && ffc) ffc.value = state.flowframes.factor;
+        }
+        if (window.FlowframesPanel && window.FlowframesPanel.renderFactorInfo) window.FlowframesPanel.renderFactorInfo();
       }
       if (state.upscale) {
         var modelUps = document.getElementById("upscaleModel");
@@ -1518,12 +1562,18 @@
       if (!state) return false;
       var validInterp = ["rife4.25-heavy", "rife4.25", "rife4.25-heavy-tensorrt", "rife4.25-tensorrt"];
       var validUpscale = ["adore", "fallin_soft"];
-      
+      var validFfAi = ["RifeNcnn", "RifeNcnnVs", "DainNcnn"];
+      var validFfEnc = ["X264", "Nvenc264", "Amf264", "X265", "Nvenc265", "Amf265", "SvtAv1", "NvencAv1"];
+
       if (state.interpolation && state.interpolation.model) {
         if (validInterp.indexOf(state.interpolation.model) === -1) return false;
       }
       if (state.upscale && state.upscale.model) {
         if (validUpscale.indexOf(state.upscale.model) === -1) return false;
+      }
+      if (state.flowframes) {
+        if (state.flowframes.ai && validFfAi.indexOf(state.flowframes.ai) === -1) return false;
+        if (state.flowframes.encoder && validFfEnc.indexOf(state.flowframes.encoder) === -1) return false;
       }
       if (state.python && state.python.path) {
         if (!this._validatePythonPath(state.python.path)) return false;
@@ -1563,6 +1613,7 @@
 
       var sections = [
         { key: "interpolation", icon: "fa-forward", label: "Interpolation" },
+        { key: "flowframes", icon: "fa-wand-magic-sparkles", label: "Flowframes" },
         { key: "upscale", icon: "fa-expand", label: "Upscale" },
         { key: "deadframes", icon: "fa-scissors", label: "Deadframes" },
         { key: "output", icon: "fa-folder", label: "Output" },
@@ -1794,6 +1845,7 @@
 
         var tags = "";
         if (state.interpolation) tags += '<span class="preset-dot preset-dot-i" title="Interpolation"></span>';
+        if (state.flowframes) tags += '<span class="preset-dot preset-dot-f" title="Flowframes"></span>';
         if (state.upscale) tags += '<span class="preset-dot preset-dot-u" title="Upscale"></span>';
         if (state.deadframes) tags += '<span class="preset-dot preset-dot-d" title="Deadframes"></span>';
         if (state.output) tags += '<span class="preset-dot preset-dot-o" title="Output"></span>';
