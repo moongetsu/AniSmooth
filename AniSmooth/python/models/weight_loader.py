@@ -14,7 +14,7 @@ def _get_appdata_dir():
 
 WEIGHTS_DIR = os.path.join(_get_appdata_dir(), "weights")
 
-TASURL = "https://github.com/NevermindNilas/TAS-Models-Host/releases/download/main/"
+MODELS_URL = "https://github.com/moongetsu/AniSmooth-Models/releases/download/main/"
 
 def _model_filename(model_key):
     mapping = {
@@ -69,7 +69,7 @@ def download_weights(model_key, force=False, retries=3):
     os.makedirs(temp_folder, exist_ok=True)
     temp_path = os.path.join(temp_folder, filename)
 
-    url = TASURL + filename
+    url = MODELS_URL + filename
     log("info", "Downloading " + model_key + "...")
     log("info", "URL: " + url)
 
@@ -208,8 +208,8 @@ MODEL_HASHES = {
     "rife4.25-heavy":    "49f7c82d3866860683992042ba8eb559b9c01fbe2600b80a53c56de05bb13b6f",
     "adore":             "443378bdc6db6cf4a75eea61ee7afc78b2c4b6a4d3b3981a40ff61f38bbc8f1a",
     "fallin_soft":       "910aa56a9a1187df97c3284177da1bc66836679350b2613191340734937e9960",
-    "shufflecugan":      None,
-    "fallin_strong":     None,
+    "shufflecugan":      "88a6d89f04eaf27a9f7b60937857768a6bc04fb360670bd9951ef533acab0616",
+    "fallin_strong":     "14b8415199aa66a6507725408a66758ba2bff9286736f19f7f07524efd821a56",
 }
 
 def _compute_sha256(file_path):
@@ -253,7 +253,7 @@ def load_weights_if_available(model, model_key, device=None):
 
     if not os.path.exists(weight_path):
         log("info", "Weight file not found: " + os.path.basename(weight_path))
-        log("info", "Attempting download from TAS-Models-Host CDN...")
+        log("info", "Attempting download from AniSmooth-Models host...")
         if not download_weights(model_key):
             log("error", "Download failed. Place the model manually at:")
             log("error", "  " + weight_path)
