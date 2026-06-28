@@ -597,7 +597,7 @@ input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accen
 .factor-custom {
   background: var(--inset); border: 1px solid var(--border); border-radius: 3px;
   color: var(--text); font-family: inherit; font-size: 9px; font-weight: 500;
-  padding: 3px 6px; width: 42px; outline: none; text-align: center; transition: border-color 0.15s;
+  padding: 3px 6px; flex: 1 1 100%; min-width: 80px; outline: none; text-align: left; transition: border-color 0.15s;
 }
 .factor-custom:focus { border-color: var(--accent); }
 .factor-custom::placeholder { color: var(--text-dim); font-size: 8px; }
