@@ -8,7 +8,11 @@
       try {
         var fs = window.FileSystem.fs;
         var path = window.FileSystem.path;
-        var configured = window.App && window.App.settings && window.App.settings.flowframesPath;
+        var settings = window.App && window.App.settings;
+        var version = (settings && settings.flowframesVersion) || "1.36.0";
+        var versionPath = version === "1.36.0" ? (settings && settings.flowframesPath136) : (settings && settings.flowframesPath142);
+        if (versionPath && fs.existsSync(versionPath)) return versionPath;
+        var configured = settings && settings.flowframesPath;
         if (configured && fs.existsSync(configured)) return configured;
         var localappdata = (process.env && process.env.LOCALAPPDATA) || "";
         if (localappdata) {

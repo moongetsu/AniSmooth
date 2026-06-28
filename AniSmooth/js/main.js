@@ -4,6 +4,8 @@
       outputPath: "",
       pythonPath: "python",
       flowframesPath: "",
+      flowframesPath136: "",
+      flowframesPath142: "",
       flowframesVersion: "1.36.0",
       outputPrefix: "AniSmooth",
       outputTimestamp: true,
@@ -62,6 +64,8 @@
       this.settings.outputPath = window.StorageManager.getItem("anismooth_output_path") || this.defaultDownloadFolder;
       this.settings.pythonPath = window.StorageManager.getItem("anismooth_python_path") || "python";
       this.settings.flowframesPath = window.StorageManager.getItem("anismooth_flowframes_path") || "";
+      this.settings.flowframesPath136 = window.StorageManager.getItem("anismooth_flowframes_path_136") || "";
+      this.settings.flowframesPath142 = window.StorageManager.getItem("anismooth_flowframes_path_142") || "";
       this.settings.flowframesVersion = window.StorageManager.getItem("anismooth_flowframes_version") || "1.36.0";
       this.settings.outputPrefix = window.StorageManager.getItem("anismooth_output_prefix") || "AniSmooth";
       this.settings.outputTimestamp = window.StorageManager.getItem("anismooth_output_timestamp", "1") === "1";
@@ -175,6 +179,32 @@
           }
         });
       }
+
+      var bindVersionPathBtn = function (btnId, inputId, storageKey, settingKey) {
+        var btn = document.getElementById(btnId);
+        if (btn) {
+          btn.addEventListener("click", function () {
+            var ffStart = "";
+            try {
+              var la = process.env.LOCALAPPDATA || "";
+              if (la) ffStart = window.FileSystem.path.join(la, "Flowframes");
+            } catch (e) {}
+            var picked = window.FileSystem.chooseFileWithSystemExplorer
+              ? window.FileSystem.chooseFileWithSystemExplorer("Select Flowframes.exe for " + (storageKey.indexOf("136") !== -1 ? "1.36.0" : "1.42.0"), ffStart, "Executable (*.exe)|*.exe")
+              : null;
+            if (picked) {
+              self.settings[settingKey] = picked;
+              window.StorageManager.setItem(storageKey, picked);
+              var input = document.getElementById(inputId);
+              if (input) input.value = picked;
+              if (window.FlowframesPanel && window.FlowframesPanel.checkAvailability) window.FlowframesPanel.checkAvailability();
+              dbg('info', 'Settings', 'Flowframes path updated (' + (storageKey.indexOf("136") !== -1 ? "1.36.0" : "1.42.0") + '): ' + picked);
+            }
+          });
+        }
+      };
+      bindVersionPathBtn("chooseFlowframes136Btn", "flowframesPath136Input", "anismooth_flowframes_path_136", "flowframesPath136");
+      bindVersionPathBtn("chooseFlowframes142Btn", "flowframesPath142Input", "anismooth_flowframes_path_142", "flowframesPath142");
 
       var rerunSetupBtn = document.getElementById("rerunSetupBtn");
       if (rerunSetupBtn) {
@@ -334,6 +364,20 @@
         });
       }
 
+      var bindVersionPathInput = function (inputId, storageKey, settingKey) {
+        var input = document.getElementById(inputId);
+        if (input) {
+          input.value = self.settings[settingKey] || "";
+          input.addEventListener("change", function () {
+            self.settings[settingKey] = input.value.trim();
+            window.StorageManager.setItem(storageKey, self.settings[settingKey]);
+            if (window.FlowframesPanel && window.FlowframesPanel.checkAvailability) window.FlowframesPanel.checkAvailability();
+          });
+        }
+      };
+      bindVersionPathInput("flowframesPath136Input", "anismooth_flowframes_path_136", "flowframesPath136");
+      bindVersionPathInput("flowframesPath142Input", "anismooth_flowframes_path_142", "flowframesPath142");
+
       var ffVer = document.getElementById("flowframesVersion");
       if (ffVer) {
         ffVer.value = this.settings.flowframesVersion;
@@ -341,6 +385,7 @@
           self.settings.flowframesVersion = ffVer.value;
           window.StorageManager.setItem("anismooth_flowframes_version", ffVer.value);
           self._filterVersionLabels();
+          if (window.FlowframesPanel && window.FlowframesPanel.checkAvailability) window.FlowframesPanel.checkAvailability();
           dbg('info', 'Settings', 'Flowframes version set to: ' + ffVer.value);
         });
         this._filterVersionLabels();

@@ -360,13 +360,29 @@
             <span class="panel-title">Flowframes</span>
           </div>
           <span class="form-hint" style="margin-bottom:8px;display:block;" data-ff-version-label="1.36.0 1.42.0">Path to Flowframes.exe used by the Flowframes tab.</span>
-          <div class="form-group">
-            <label for="flowframesPathInput">Flowframes.exe Path</label>
+          <div class="form-group" data-ff-version-label="1.36.0 1.42.0">
+            <label for="flowframesPathInput">Flowframes.exe Path (default)</label>
             <div class="folder-row">
-              <input type="text" id="flowframesPathInput" placeholder="C:\Users\you\AppData\Local\Flowframes\Flowframes.exe" style="flex:1;">
+              <input type="text" id="flowframesPathInput" placeholder="%LOCALAPPDATA%\Flowframes\Flowframes.exe" style="flex:1;">
               <button id="chooseFlowframesBtn" class="btn-sm"><i class="fa-solid fa-folder"></i></button>
             </div>
-            <span class="form-hint">Path to Flowframes.exe. Auto-detected at %LOCALAPPDATA%\Flowframes if left blank. Used by the Flowframes tab.</span>
+            <span class="form-hint">Shared fallback path. Auto-detected at %LOCALAPPDATA%\Flowframes if left blank.</span>
+          </div>
+          <div class="form-group" data-ff-version-label="1.36.0">
+            <label for="flowframesPath136Input">1.36.0 Path (override)</label>
+            <div class="folder-row">
+              <input type="text" id="flowframesPath136Input" placeholder="%LOCALAPPDATA%\Flowframes\Flowframes.exe" style="flex:1;">
+              <button id="chooseFlowframes136Btn" class="btn-sm"><i class="fa-solid fa-folder"></i></button>
+            </div>
+            <span class="form-hint">Specific path for Flowframes 1.36.0. Overrides the default path when this version is selected.</span>
+          </div>
+          <div class="form-group" data-ff-version-label="1.42.0">
+            <label for="flowframesPath142Input">1.42.0 Path (override)</label>
+            <div class="folder-row">
+              <input type="text" id="flowframesPath142Input" placeholder="%LOCALAPPDATA%\Flowframes\Flowframes.exe" style="flex:1;">
+              <button id="chooseFlowframes142Btn" class="btn-sm"><i class="fa-solid fa-folder"></i></button>
+            </div>
+            <span class="form-hint">Specific path for Flowframes 1.42.0. Overrides the default path when this version is selected.</span>
           </div>
           <div class="form-group">
             <label for="flowframesVersion">Version</label>
@@ -374,7 +390,7 @@
               <option value="1.36.0">1.36.0 (free)</option>
               <option value="1.42.0">1.42.0 (Patreon)</option>
             </select>
-            <span class="form-hint">Select the installed Flowframes version. CLI arguments differ between versions. 1.36.0 is the older free version.</span>
+            <span class="form-hint">Select the installed Flowframes version. CLI arguments differ between versions.</span>
           </div>
           <div class="info-card" style="margin-top:8px;" data-ff-version-label="1.36.0">
             <span class="meta-strip meta-strip-sm">
