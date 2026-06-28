@@ -14,21 +14,29 @@ def _get_appdata_dir():
 
 WEIGHTS_DIR = os.path.join(_get_appdata_dir(), "weights")
 
-MODELS_URL = "https://github.com/moongetsu/AniSmooth-Models/releases/download/main/"
+MODELS_URL = "https://github.com/moongetsu/AniSmooth-Models/releases/download/"
+
+MODEL_FILES = {
+    "rife4.25":          ("interpolation", "rife425.pth"),
+    "rife4.25-heavy":    ("interpolation", "rife425_heavy.pth"),
+    "shufflecugan":      ("upscale", "sudo_shuffle_cugan_9.584.969.pth"),
+    "adore":             ("upscale", "adore.pth"),
+    "fallin_soft":       ("upscale", "Fallin_soft.pth"),
+    "fallin_strong":     ("upscale", "Fallin_strong.pth"),
+}
 
 def _model_filename(model_key):
-    mapping = {
-        "rife4.25":          "rife425.pth",
-        "rife4.25-heavy":    "rife425_heavy.pth",
-        "shufflecugan":      "sudo_shuffle_cugan_9.584.969.pth",
-        "adore":             "adore.pth",
-        "fallin_soft":       "Fallin_soft.pth",
-        "fallin_strong":     "Fallin_strong.pth",
-    }
-    name = mapping.get(model_key)
-    if name is None:
+    entry = MODEL_FILES.get(model_key)
+    if entry is None:
         raise ValueError("Unknown model key: " + model_key)
-    return name
+    return entry[1]
+
+def _model_url(model_key):
+    entry = MODEL_FILES.get(model_key)
+    if entry is None:
+        raise ValueError("Unknown model key: " + model_key)
+    category, filename = entry
+    return MODELS_URL + category + "/" + filename
 
 def log(msg_type, msg, **kw):
     out = {"type": msg_type, "msg": str(msg)}
@@ -69,7 +77,7 @@ def download_weights(model_key, force=False, retries=3):
     os.makedirs(temp_folder, exist_ok=True)
     temp_path = os.path.join(temp_folder, filename)
 
-    url = MODELS_URL + filename
+    url = _model_url(model_key)
     log("info", "Downloading " + model_key + "...")
     log("info", "URL: " + url)
 
