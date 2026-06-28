@@ -1,4 +1,10 @@
 (function () {
+  function esc(str) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(str || ''));
+    return d.innerHTML;
+  }
+
   var CustomSelect = {
     init: function () {
       var self = this;
@@ -54,9 +60,9 @@
 
     getOptionHTML: function (option) {
       if (option.hasAttribute("data-label")) {
-        return option.innerHTML;
+        return esc(option.getAttribute("data-label"));
       }
-      return option.textContent.trim();
+      return esc(option.textContent.trim());
     },
 
     bindElement: function (el) {
@@ -88,6 +94,20 @@
               found = true;
             } else {
               opt.classList.remove("active");
+            }
+          }
+
+          if (!found) {
+            var firstVisible = null;
+            for (var fi = 0; fi < options.length; fi++) {
+              if (options[fi].style.display !== "none") { firstVisible = options[fi]; break; }
+            }
+            if (firstVisible) {
+              newVal = firstVisible.getAttribute("data-value");
+              this.setAttribute("data-value", newVal);
+              firstVisible.classList.add("active");
+              displayHTML = self.getOptionHTML(firstVisible);
+              found = true;
             }
           }
 

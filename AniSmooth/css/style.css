@@ -678,12 +678,14 @@ input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accen
 }
 .custom-select.open .select-options { opacity: 1; visibility: visible; transform: translateY(0); }
 .select-option {
-  display: flex; align-items: center; gap: 5px; padding: 5px 8px;
+  display: flex; align-items: flex-start; gap: 5px; padding: 5px 8px;
   font-size: 10px; color: var(--text-2); cursor: pointer; transition: background 0.1s, color 0.1s;
+  line-height: 1.35;
 }
 .select-option:hover { background: var(--active-overlay); color: var(--text); }
 .select-option.active { background: var(--active-overlay); color: var(--text); font-weight: 500; }
-.select-option i { font-size: 10px; color: var(--text); width: 12px; text-align: center; }
+.select-option i { font-size: 10px; color: var(--text); width: 12px; text-align: center; margin-top: 1px; flex-shrink: 0; }
+.select-option small { display: block; color: var(--text-3); font-size: 9px; font-weight: 400; margin-top: 1px; }
 .select-option.active i {
   color: var(--text);
 }

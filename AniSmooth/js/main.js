@@ -1644,6 +1644,7 @@
           if (!ffMatched && ffc) ffc.value = state.flowframes.factor;
         }
         if (window.FlowframesPanel && window.FlowframesPanel.renderFactorInfo) window.FlowframesPanel.renderFactorInfo();
+        if (window.FlowframesPanel && window.FlowframesPanel.applyVersion) window.FlowframesPanel.applyVersion();
       }
       if (state.upscale) {
         var modelUps = document.getElementById("upscaleModel");
